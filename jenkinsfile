@@ -6,7 +6,10 @@ pipeline {
         timeout(time: 30, unit: 'MINUTES')
         disableConcurrentBuilds()
     }
-
+ parameters {
+ booleanParam (name: 'XRAY_SCAN', defaultValue: false, description: 'Scan artifacts using Xray')
+ booleanParam (name: 'FAIL_BUILD', defaultValue: false, description: 'Fail build if any violation is found in Xray')
+    }
     stages {
         stage('gradle clean build') {
             agent {
@@ -52,7 +55,11 @@ pipeline {
     }
 
 }    
-           steps {
+ stage('Xray Scan'){
+            when {
+                expression { return params.XRAY_SCAN }
+            }         
+  steps {
                 script {
                     xrayConfig = [
                         'buildName'     : buildInfo.name,
